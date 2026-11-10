@@ -8,17 +8,19 @@
 
 ## Testing
 
-- Pruebas backend: `backend/tests/test_routes.py`. Pruebas de utilidades frontend: `frontend/src/lib/financial-utils.test.ts`.
+- Pruebas backend: `backend/tests/test_routes.py` (endpoints, contrato de movimientos, estado RNG y CORS). Pruebas de utilidades frontend: `frontend/src/lib/financial-utils.test.ts` (KPI, agrupación mensual y periodo visible).
 - Scripts frontend definidos en `frontend/package.json`: `npm test`, `npm run lint`, `npm run build`. Backend: `pytest` desde `backend/`.
 
 ## DX y ejecución
 
 - `docker-compose.yml` publica el frontend en `5173`, la API en `8000` y `debugpy` en `5678`.
+- `docker-compose.yml` pasa `CORS_ALLOWED_ORIGINS` al backend; el valor predeterminado es `http://localhost:5173`.
 - `frontend/vite.config.ts` reenvía `/api` a `backend:8000`; `frontend/src/App.tsx` lee `VITE_API_BASE_URL` para usar otra base.
-- `README.es.md` referencia `frontend/.env.example`, que no existe en el repositorio.
+- Ambos README indican crear `frontend/.env.local` para configurar `VITE_API_BASE_URL`.
 
-## Riesgos concretos
+## Comportamientos y límites concretos
 
-- Datos/fechas: `backend/app/routes.py` produce 360 movimientos con semilla `42`, pero el año depende de `date.today()`; `frontend/src/App.tsx` muestra `2024 - Full Year`.
-- Seguridad/ejecución: `backend/app/main.py` permite cualquier origen CORS; `backend/Dockerfile` inicia `debugpy` en `0.0.0.0:5678`, publicado por `docker-compose.yml`.
+- Datos/fechas: `backend/app/routes.py` produce 360 movimientos con una instancia local `random.Random(seed)`; el año sigue dependiendo de `date.today()`. `frontend/src/App.tsx` presenta el rango calculado desde los movimientos.
+- Seguridad/ejecución: `backend/app/main.py` permite por defecto `http://localhost:5173` y acepta una lista mediante `CORS_ALLOWED_ORIGINS`; `backend/Dockerfile` inicia `debugpy` en `0.0.0.0:5678`, publicado por `docker-compose.yml`.
+- `frontend/src/lib/financial-utils.ts` agrupa fechas ISO por el prefijo `YYYY-MM`, evitando conversión a hora local.
 - Ver el detalle categorizado y los archivos relacionados en `.agents/rules/project-conventions.md`.

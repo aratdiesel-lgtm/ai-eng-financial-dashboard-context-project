@@ -4,6 +4,7 @@ import {
   computeKPIs,
   computeMonthlyData,
   formatCurrency,
+  formatMovementPeriod,
   formatPercent,
 } from "./financial-utils";
 import type { FinancialMovement } from "./financial-types";
@@ -100,6 +101,35 @@ describe("computeMonthlyData", () => {
       outcome: 0,
       profitPercent: 100,
     });
+  });
+
+  it("groups ISO dates on the first day of a month without timezone shifts", () => {
+    const firstOfMonth: FinancialMovement[] = [
+      {
+        create_date: "2024-03-01",
+        amount: 120,
+        operation_type: "income",
+        category: "sales",
+        business_type: "B2B",
+      },
+    ];
+
+    expect(computeMonthlyData(firstOfMonth)[0].month).toBe("Mar 2024");
+  });
+});
+
+describe("formatMovementPeriod", () => {
+  it("returns the earliest and latest movement dates", () => {
+    const period = formatMovementPeriod([
+      sampleMovements[2],
+      sampleMovements[0],
+    ]);
+
+    expect(period).toBe("2024-01-10 - 2024-02-01");
+  });
+
+  it("handles an empty movement list", () => {
+    expect(formatMovementPeriod([])).toBe("No data");
   });
 });
 

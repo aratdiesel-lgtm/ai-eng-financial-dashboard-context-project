@@ -1,4 +1,5 @@
 from datetime import date
+import random
 
 from fastapi.testclient import TestClient
 
@@ -16,6 +17,33 @@ def test_generate_mock_movements_returns_full_year_sorted_data():
     assert movements == sorted(movements, key=lambda item: item.create_date)
 
 
+def test_generate_mock_movements_does_not_change_global_random_state():
+    random.seed(1234)
+    expected_next_value = random.random()
+    random.seed(1234)
+
+    generate_mock_movements(seed=42)
+
+    assert random.random() == expected_next_value
+
+
+def test_metrics_endpoint_returns_financial_movement_contract():
+    response = client.get("/api/metrics")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload
+    assert set(payload[0]) == {
+        "create_date",
+        "amount",
+        "operation_type",
+        "category",
+        "business_type",
+    }
+    assert {item["operation_type"] for item in payload} <= {"income", "outcome"}
+    assert {item["business_type"] for item in payload} <= {"B2B", "B2C"}
+
+
 def test_filter_movements_by_date_includes_range_edges():
     movements = generate_mock_movements(seed=42)
     target_date = movements[0].create_date
@@ -31,6 +59,18 @@ def test_health_endpoint_returns_ok():
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_cors_allows_local_frontend_and_rejects_other_origins():
+    allowed_response = client.get(
+        "/health", headers={"Origin": "http://localhost:5173"}
+    )
+    rejected_response = client.get(
+        "/health", headers={"Origin": "https://untrusted.example"}
+    )
+
+    assert allowed_response.headers["access-control-allow-origin"] == "http://localhost:5173"
+    assert "access-control-allow-origin" not in rejected_response.headers
 
 
 def test_metrics_endpoint_respects_date_filters():
