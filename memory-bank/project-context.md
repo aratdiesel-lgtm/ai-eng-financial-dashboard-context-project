@@ -68,3 +68,9 @@ Estas prioridades se derivan de los gaps anteriores; no son un roadmap aprobado:
 
 - Reglas propuestas, cada una con alcance y evidencia: `.agents/rules/`.
 - Arquitectura y comandos locales documentados: `README.es.md`, `docker-compose.yml`, `frontend/package.json`, `backend/requirements.txt`.
+
+## 4. Exploración de skills
+
+- Se exploraron los temas `performance` y `testing` con `npx skills find performance` y `npx skills find testing`.
+- Se aplicó `vercel-labs/agent-skills@vercel-react-best-practices`, disponible en `.agents/skills/vercel-react-best-practices/`. Es pertinente para este proyecto porque el frontend es React + TypeScript y `frontend/src/App.tsx` calcula KPI, agrupaciones mensuales y periodo a partir de la respuesta del dashboard.
+- Aplicación: `frontend/src/App.tsx` conserva la respuesta de movimientos como estado fuente y deriva KPI, datos mensuales y periodo durante el render. Esto evita estado duplicado y riesgo de desincronización, conforme a `rules/rerender-derived-state-no-effect.md`; el arreglo vacío usado antes de recibir los movimientos también se mantiene estable.

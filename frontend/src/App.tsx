@@ -15,6 +15,7 @@ import {
 } from "@/lib/financial-utils";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+const EMPTY_MONTHLY_DATA: MonthlyDataPoint[] = [];
 
 async function fetchFinancialData(): Promise<FinancialMovement[]> {
   const response = await fetch(`${API_BASE_URL}/api/metrics`);
@@ -25,21 +26,26 @@ async function fetchFinancialData(): Promise<FinancialMovement[]> {
 }
 
 function App() {
-  const [metrics, setMetrics] = useState<KPIMetrics | null>(null);
-  const [monthlyData, setMonthlyData] = useState<MonthlyDataPoint[]>([]);
-  const [period, setPeriod] = useState("Loading...");
+  const [movements, setMovements] = useState<FinancialMovement[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const metrics: KPIMetrics | null = movements
+    ? computeKPIs(movements)
+    : null;
+  const monthlyData = movements
+    ? computeMonthlyData(movements)
+    : EMPTY_MONTHLY_DATA;
+  const period = movements
+    ? formatMovementPeriod(movements)
+    : error
+      ? "Unavailable"
+      : "Loading...";
+
   useEffect(() => {
     fetchFinancialData()
-      .then((movements) => {
-        setMetrics(computeKPIs(movements));
-        setMonthlyData(computeMonthlyData(movements));
-        setPeriod(formatMovementPeriod(movements));
-      })
+      .then(setMovements)
       .catch(() => {
-        setPeriod("Unavailable");
         setError(
           "No se pudo cargar la informacion financiera. Revisa la API de backend.",
         );
