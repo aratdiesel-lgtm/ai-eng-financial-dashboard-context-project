@@ -52,30 +52,21 @@ export function ProfitPercentChart({ data, loading }: ProfitPercentChartProps) {
   const chartTitleId = useId()
   const chartDescriptionId = useId()
 
-  if (loading) {
-    return (
-      <Card aria-busy={loading} className="border-border/60">
-        <CardHeader className="pb-4">
-          <Skeleton className="h-5 w-52" />
-          <Skeleton className="h-3 w-64 mt-1" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[280px] w-full rounded-lg" />
-        </CardContent>
-      </Card>
-    )
-  }
-
   const hasData = data.some((d) => d.profitPercent !== 0)
 
   return (
-    <Card className="border-border/60">
+    <Card aria-busy={loading} className="border-border/60">
       <CardHeader className="pb-4">
         <CardTitle id={chartTitleId} className="text-base font-semibold">Profit Margin %</CardTitle>
         <CardDescription>Monthly profit as a percentage of total income</CardDescription>
       </CardHeader>
       <CardContent>
-        {!hasData ? (
+        {loading ? (
+          <>
+            <Skeleton className="h-[280px] w-full rounded-lg" />
+            <div aria-hidden="true" className="mt-4 h-5" />
+          </>
+        ) : !hasData ? (
           <div className="flex h-[280px] items-center justify-center text-muted-foreground text-sm">
             No data available to display
           </div>

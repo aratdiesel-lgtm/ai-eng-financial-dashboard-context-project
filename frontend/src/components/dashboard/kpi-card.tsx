@@ -34,23 +34,11 @@ const variantStyles: Record<KPICardProps['variant'], { badge: string; icon: stri
 export function KPICard({ label, value, helperText, icon: Icon, variant, loading }: KPICardProps) {
   const styles = variantStyles[variant]
 
-  if (loading) {
-    return (
-      <Card aria-busy={loading} className="border-border/60">
-        <CardContent className="p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-8 w-8 rounded-lg" />
-          </div>
-          <Skeleton className="h-8 w-36" />
-          <Skeleton className="h-3 w-44" />
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
-    <Card className="border-border/60 hover:border-border transition-colors">
+    <Card
+      aria-busy={loading}
+      className="border-border/60 hover:border-border transition-colors"
+    >
       <CardContent className="p-6 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground tracking-wide uppercase text-pretty">
@@ -60,7 +48,13 @@ export function KPICard({ label, value, helperText, icon: Icon, variant, loading
             <Icon size={16} className={styles.icon} />
           </span>
         </div>
-        <p className="text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+        <div className="flex min-h-9 items-center">
+          {loading ? (
+            <Skeleton aria-hidden="true" className="h-8 w-36" />
+          ) : (
+            <p className="text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+          )}
+        </div>
         <p className="text-xs text-muted-foreground leading-relaxed">{helperText}</p>
       </CardContent>
     </Card>
